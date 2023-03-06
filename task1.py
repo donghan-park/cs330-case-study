@@ -5,11 +5,11 @@ from matplotlib import pyplot as plt
 import time
 
 # Store data from CSV file into array of tuples that represent points
-def init_P():
-    with open('geolife-cars.csv') as file:
+def get_csv_data(file_name):
+    with open(file_name) as file:
         next(file)
-        P = [(float(x), float(y)) for date, id, x, y in csv.reader(file)]
-    return P
+        data = [(float(i[2]), float(i[3])) for i in csv.reader(file)]
+    return data
 
 def get_dist(x1, y1, x2, y2):
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
@@ -23,7 +23,7 @@ class Node:
 
 class KDTree:
     def __init__(self, P, r):
-        self.tree = self.build_tree(P)
+        self.root = self.build_tree(P)
         self.radius = r
 
     # Runtime: O(nlogn) to build a KD-tree of n points in calligraphic P
@@ -45,22 +45,22 @@ class KDTree:
     # of points with radius r centered at point p. Instead of depending on the total
     # number of points in calligraphic P, it instead traverses through a preprocessed
     # KD-Tree, meaning its complexity only depends on the size of a small neighborhood.
-    def query_density(self, p, tree, r, count=0):
-        if tree is None:
+    def query_density(self, p, root, count=0):
+        if root is None:
             return count
-        dist = get_dist(p[0], p[1], tree.point[0], tree.point[1])
-        if dist <= r:
+        dist = get_dist(p[0], p[1], root.point[0], root.point[1])
+        if dist <= self.radius:
             count += 1
-        axis = tree.axis
-        if tree.left and p[axis] - r <= tree.point[axis]:
-            count = self.query_density(p, tree.left, r, count)
-        if tree.right and p[axis] + r >= tree.point[axis]:
-            count = self.query_density(p, tree.right, r, count)
+        axis = root.axis
+        if root.left and p[axis] - self.radius <= root.point[axis]:
+            count = self.query_density(p, root.left, count)
+        if root.right and p[axis] + self.radius >= root.point[axis]:
+            count = self.query_density(p, root.right, count)
         return count
 
     # Runtime: O(1) because query_density() runs in O(1) time.
     def density(self, p):
-        return self.query_density(p, self.tree, self.radius)
+        return self.query_density(p, self.root)
     
     # Runtime: O(n) because it linearly traverses through all points in calligraphic P.
     # For every point, the density() function is called, but this is an O(1) operation.
@@ -94,10 +94,11 @@ def plot_hubs(P, hubs, radius):
 # For testing
 if __name__ == "__main__":
     start_time = time.time()
-    P = init_P()
+    P = get_csv_data('geolife-cars.csv')
+    density_r = 5
     k = 10
     r = 10
-    tree = KDTree(P, r)
+    tree = KDTree(P, density_r)
     hubs = tree.hubs(P, k, r)
     
     print("Runtime: {:.4f} sec".format(time.time() - start_time))
