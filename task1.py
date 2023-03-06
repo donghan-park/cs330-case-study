@@ -93,13 +93,53 @@ def plot_hubs(P, hubs, radius):
 
 # For testing
 if __name__ == "__main__":
-    start_time = time.time()
     P = get_csv_data('geolife-cars.csv')
+    P_10 = get_csv_data('geolife-cars-ten-percent.csv')
+    P_30 = get_csv_data('geolife-cars-thirty-percent.csv')
+    P_60 = get_csv_data('geolife-cars-sixty-percent.csv')
     density_r = 5
     k = 10
-    r = 10
+    r = 8
+
+    start_time = time.time()
     tree = KDTree(P, density_r)
     hubs = tree.hubs(P, k, r)
+    run_time = time.time() - start_time
+    print('[k = {}, r = {}]'.format(k, r))
+    print("Runtime: {:.4f} sec".format(run_time))
+    # plot_hubs(P, hubs, r)
+
+    ks = [5, 10, 20, 40]
+    r = 2
+    for k in ks:
+        print("[k = {}, r = {}]".format(k, r))
+        for i in range(3):
+            start_time = time.time()
+            tree = KDTree(P, density_r)
+            hubs = tree.hubs(P, k, r)
+            run_time = time.time() - start_time
+            print("{}) Runtime: {:.4f} sec".format(i + 1, run_time))
     
-    print("Runtime: {:.4f} sec".format(time.time() - start_time))
-    plot_hubs(P, hubs, r)
+    k = 10
+    r = 8
+    start_time = time.time()
+    tree = KDTree(P_10, density_r)
+    hubs = tree.hubs(P_10, k, r)
+    run_time = time.time() - start_time
+    print('[10% dataset: k = {}, r = {}]'.format(k, r))
+    print("Runtime: {:.4f} sec".format(run_time))
+
+    start_time = time.time()
+    tree = KDTree(P_30, density_r)
+    hubs = tree.hubs(P_30, k, r)
+    run_time = time.time() - start_time
+    print('[30% dataset: k = {}, r = {}]'.format(k, r))
+    print("Runtime: {:.4f} sec".format(run_time))
+
+    start_time = time.time()
+    tree = KDTree(P_60, density_r)
+    hubs = tree.hubs(P_60, k, r)
+    run_time = time.time() - start_time
+    print('[60% dataset: k = {}, r = {}]'.format(k, r))
+    print("Runtime: {:.4f} sec".format(run_time))
+    
