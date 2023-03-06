@@ -38,7 +38,11 @@ class KDTree:
         right = self.build_tree(sorted_points[mid_index + 1:], depth + 1)
 
         return Node(point, axis, left, right)
-
+    
+    # Runtime: O(1) because density is computed by traversing through a neighborhood 
+    # of points with radius r centered at point p. Instead of depending on the total
+    # number of points in calligraphic P, it instead traverses through a preprocessed
+    # KD-Tree, meaning its complexity only depends on the size of a small neighborhood.
     def query_density(self, p, tree, r, count=0):
         if tree is None:
             return count
@@ -52,9 +56,12 @@ class KDTree:
             count = self.query_density(p, tree.right, r, count)
         return count
 
+    # Runtime: O(1) because query_density() runs in O(1) time.
     def density(self, p):
         return self.query_density(p, self.tree, self.radius)
     
+    # Runtime: O(n) because it linearly traverses through all points in calligraphic P.
+    # For every point, the density() function is called, but this is an O(1) operation.
     def hubs(self, P, k, r):
         hubs = []
         for p in P:
@@ -66,28 +73,30 @@ class KDTree:
             if len(hubs) == k:
                 return hubs
         return hubs
+    
+# Plot scatterplot of all points in calligraphic P and all hubs
+def plot_hubs(P, hubs, radius):
+    p_x, p_y = np.array([P]).T
+    hubs_x, hubs_y = np.array([hubs]).T
 
-# for testing
+    fig, ax = plt.subplots()
+    plt.scatter(p_x, p_y, s=0.1, color='blue')
+    plt.scatter(hubs_x, hubs_y, s=20, color='red')
+
+    for hub in hubs:
+        circle = plt.Circle((hub[0], hub[1]), radius, color='black', fill=False, linestyle='dashed')
+        ax.add_artist(circle)
+    ax.set_aspect('equal', adjustable='box')
+    plt.show()
+
+# For testing
 if __name__ == "__main__":
     start_time = time.time()
     P = init_P()
-    k = 40
-    r = 2
+    k = 10
+    r = 10
     tree = KDTree(P, r)
     hubs = tree.hubs(P, k, r)
-    print("runtime: {:.4f} sec".format(time.time() - start_time))
-
-    # P_np = np.array([P])
-    # hubs_np = np.array([hubs])
-    # p_x, p_y = P_np.T
-    # hubs_x, hubs_y = hubs_np.T
-
-    # fig, ax = plt.subplots()
-    # plt.scatter(p_x, p_y, s=1, color = 'blue')
-    # plt.scatter(hubs_x, hubs_y, s=20, color='red')
-    # for x in hubs:
-    #     circle = plt.Circle((x[0], x[1]), r, color='black', fill=False, linestyle='dashed')
-    #     ax.add_artist(circle)
-
-    # ax.set_aspect('equal', adjustable='box')
-    # plt.show()
+    
+    print("Runtime: {:.4f} sec".format(time.time() - start_time))
+    plot_hubs(P, hubs, r)
