@@ -4,6 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import time
 
+# Store data from CSV file into array of tuples that represent points
 def init_P():
     with open('geolife-cars.csv') as file:
         next(file)
@@ -25,6 +26,7 @@ class KDTree:
         self.tree = self.build_tree(P)
         self.radius = r
 
+    # Runtime: O(nlogn) to build a KD-tree of n points in calligraphic P
     def build_tree(self, points, depth=0):
         if not points:
             return None
