@@ -4,11 +4,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 import time
 
-def init_P():
-    with open('geolife-cars.csv') as file:
+# Store data from CSV file into array of tuples that represent points
+def get_csv_data(file_name):
+    with open(file_name) as file:
         next(file)
-        P = [(float(x), float(y)) for date, id, x, y in csv.reader(file)]
-    return P
+        data = [(float(i[2]), float(i[3])) for i in csv.reader(file)]
+    return data
 
 def get_dist(x1, y1, x2, y2):
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
@@ -22,9 +23,10 @@ class Node:
 
 class KDTree:
     def __init__(self, P, r):
-        self.tree = self.build_tree(P)
+        self.root = self.build_tree(P)
         self.radius = r
 
+    # Runtime: O(nlogn) to build a KD-tree of n points in calligraphic P
     def build_tree(self, points, depth=0):
         if not points:
             return None
@@ -38,23 +40,30 @@ class KDTree:
         right = self.build_tree(sorted_points[mid_index + 1:], depth + 1)
 
         return Node(point, axis, left, right)
-
-    def query_density(self, p, tree, r, count=0):
-        if tree is None:
+    
+    # Runtime: O(1) because density is computed by traversing through a neighborhood 
+    # of points with radius r centered at point p. Instead of depending on the total
+    # number of points in calligraphic P, it instead traverses through a preprocessed
+    # KD-Tree, meaning its complexity only depends on the size of a small neighborhood.
+    def query_density(self, p, root, count=0):
+        if root is None:
             return count
-        dist = get_dist(p[0], p[1], tree.point[0], tree.point[1])
-        if dist <= r:
+        dist = get_dist(p[0], p[1], root.point[0], root.point[1])
+        if dist <= self.radius:
             count += 1
-        axis = tree.axis
-        if tree.left and p[axis] - r <= tree.point[axis]:
-            count = self.query_density(p, tree.left, r, count)
-        if tree.right and p[axis] + r >= tree.point[axis]:
-            count = self.query_density(p, tree.right, r, count)
+        axis = root.axis
+        if root.left and p[axis] - self.radius <= root.point[axis]:
+            count = self.query_density(p, root.left, count)
+        if root.right and p[axis] + self.radius >= root.point[axis]:
+            count = self.query_density(p, root.right, count)
         return count
 
+    # Runtime: O(1) because query_density() runs in O(1) time.
     def density(self, p):
-        return self.query_density(p, self.tree, self.radius)
+        return self.query_density(p, self.root)
     
+    # Runtime: O(n) because it linearly traverses through all points in calligraphic P.
+    # For every point, the density() function is called, but this is an O(1) operation.
     def hubs(self, P, k, r):
         hubs = []
         for p in P:
@@ -66,28 +75,71 @@ class KDTree:
             if len(hubs) == k:
                 return hubs
         return hubs
+    
+# Plot scatterplot of all points in calligraphic P and all hubs
+def plot_hubs(P, hubs, radius):
+    p_x, p_y = np.array([P]).T
+    hubs_x, hubs_y = np.array([hubs]).T
 
-# for testing
+    fig, ax = plt.subplots()
+    plt.scatter(p_x, p_y, s=0.1, color='blue')
+    plt.scatter(hubs_x, hubs_y, s=20, color='red')
+
+    for hub in hubs:
+        circle = plt.Circle((hub[0], hub[1]), radius, color='black', fill=False, linestyle='dashed')
+        ax.add_artist(circle)
+    ax.set_aspect('equal', adjustable='box')
+    plt.show()
+
+# For testing
 if __name__ == "__main__":
+    P = get_csv_data('geolife-cars.csv')
+    P_10 = get_csv_data('geolife-cars-ten-percent.csv')
+    P_30 = get_csv_data('geolife-cars-thirty-percent.csv')
+    P_60 = get_csv_data('geolife-cars-sixty-percent.csv')
+    density_r = 5
+    k = 10
+    r = 8
+
     start_time = time.time()
-    P = init_P()
-    k = 40
-    r = 2
-    tree = KDTree(P, r)
+    tree = KDTree(P, density_r)
     hubs = tree.hubs(P, k, r)
-    print("runtime: {:.4f} sec".format(time.time() - start_time))
+    run_time = time.time() - start_time
+    print('[k = {}, r = {}]'.format(k, r))
+    print("Runtime: {:.4f} sec".format(run_time))
+    # plot_hubs(P, hubs, r)
 
-    # P_np = np.array([P])
-    # hubs_np = np.array([hubs])
-    # p_x, p_y = P_np.T
-    # hubs_x, hubs_y = hubs_np.T
+    ks = [5, 10, 20, 40]
+    r = 2
+    for k in ks:
+        print("[k = {}, r = {}]".format(k, r))
+        for i in range(3):
+            start_time = time.time()
+            tree = KDTree(P, density_r)
+            hubs = tree.hubs(P, k, r)
+            run_time = time.time() - start_time
+            print("{}) Runtime: {:.4f} sec".format(i + 1, run_time))
+    
+    k = 10
+    r = 8
+    start_time = time.time()
+    tree = KDTree(P_10, density_r)
+    hubs = tree.hubs(P_10, k, r)
+    run_time = time.time() - start_time
+    print('[10% dataset: k = {}, r = {}]'.format(k, r))
+    print("Runtime: {:.4f} sec".format(run_time))
 
-    # fig, ax = plt.subplots()
-    # plt.scatter(p_x, p_y, s=1, color = 'blue')
-    # plt.scatter(hubs_x, hubs_y, s=20, color='red')
-    # for x in hubs:
-    #     circle = plt.Circle((x[0], x[1]), r, color='black', fill=False, linestyle='dashed')
-    #     ax.add_artist(circle)
+    start_time = time.time()
+    tree = KDTree(P_30, density_r)
+    hubs = tree.hubs(P_30, k, r)
+    run_time = time.time() - start_time
+    print('[30% dataset: k = {}, r = {}]'.format(k, r))
+    print("Runtime: {:.4f} sec".format(run_time))
 
-    # ax.set_aspect('equal', adjustable='box')
-    # plt.show()
+    start_time = time.time()
+    tree = KDTree(P_60, density_r)
+    hubs = tree.hubs(P_60, k, r)
+    run_time = time.time() - start_time
+    print('[60% dataset: k = {}, r = {}]'.format(k, r))
+    print("Runtime: {:.4f} sec".format(run_time))
+    
