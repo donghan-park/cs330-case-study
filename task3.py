@@ -8,8 +8,8 @@ def dtw(seriesA, seriesB):
     len_b = len(seriesB)
 
     # make dp table
-    dp = [[(float('inf'), 0) for j in range(len_b + 1)] for i in range(len_a + 1)]
-    dp[0][0] = (0, 0)
+    dp = [[[float('inf'), 0, float('inf')]  for j in range(len_b + 1)] for i in range(len_a + 1)]
+    dp[0][0] = [0, 0, float('inf')]
 
     for i in range(1, len_a + 1):
         for j in range(1, len_b + 1):
@@ -33,17 +33,39 @@ def dtw(seriesA, seriesB):
                 
             # print(i, j, temp1, temp2, temp3, size1, size2, size3)
             new_size = 0
+            pointer = float('inf')
+            # -1 is left, 0 is diagonal, 1 is up
             if temp2 <= temp3 and temp2 <= temp1:
                 new_size = size2
+                pointer = 1
             elif temp3 <= temp2 and temp3 <= temp1:
                 new_size = size3
+                pointer = -1
             else:
                 new_size = size1 
+                pointer = 0
                 
-            dp[i][j] = (min(temp1, temp2, temp3), new_size)
+            dp[i][j] = [min(temp1, temp2, temp3), new_size, pointer]
             # print(dp[i][j])
             # dp[i][j] = min(dist, min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]))
     
+    assign_e = [(seriesA[len_a - 1], seriesB[len_b - 1])]
+    i = len_a - 1
+    j = len_b - 1
+    while i != 0 and j != 0:
+        if dp[i][j][2] == 0: 
+            assign_e.append((seriesA[i-1], seriesB[j-1]))
+            i -= 1
+            j -=1
+        elif dp[i][j][2] == 1:
+            assign_e.append((seriesA[i-1], seriesB[j]))
+            i -= 1
+        elif dp[i][j][2] == -1:
+            assign_e.append((seriesA[i], seriesB[j-1]))
+            j -= 1
+        else: 
+            break
+
     # for i in range(len_a, 0, -1): 
     #     for j in range(len_b, 0, -1): 
     #         dp[]
@@ -58,33 +80,40 @@ def frechet(seriesA, seriesB):
     len_b = len(seriesB)
 
     # make dp table
-    dp = [[float('inf') for j in range(len_b + 1)] for i in range(len_a + 1)]
-    dp[0][0] = 0
+    dp = [[[float('inf'), float('inf')] for j in range(len_b + 1)] for i in range(len_a + 1)]
+    dp[0][0] = [0, float('inf')]
 
     for i in range(1, len_a + 1):
         for j in range(1, len_b + 1):
             dist = find_dist(seriesA[i-1][0], seriesB[j-1][0], seriesA[i-1][1], seriesB[j-1][1])
-            dp[i][j] = max(dist, min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]))
+            dp_min  = min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1])
+
+            pointer = float('inf')
+            if dp_min == dp[i - 1][j - 1]:      #diagonal 
+                pointer = 0
+            elif dp_min == dp[i - 1][j]:        #up
+                pointer = 1
+            else:       #left       
+                pointer = -1
+            dp[i][j] = [max(dist, dp_min), pointer]
+
         
     assign_e = [(seriesA[len_a - 1], seriesB[len_b - 1])]
     i = len_a - 1
     j = len_b - 1
     while i != 0 and j != 0:
-
-        if min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]) == dp[i-1][j-1]: #diagonal
+        if dp[i][j][1] == 0: 
             assign_e.append((seriesA[i-1], seriesB[j-1]))
             i -= 1
             j -=1
-        elif min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]) == dp[i-1][j]: #left
+        elif dp[i][j][1] == 1:
             assign_e.append((seriesA[i-1], seriesB[j]))
             i -= 1
-        elif min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]) == dp[i][j-1]: #right  
+        elif dp[i][j][1] == -1:
             assign_e.append((seriesA[i], seriesB[j-1]))
             j -= 1
-        else:
+        else: 
             break
-
-            # assign_e.append(min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]))
     
     for x in dp: 
         print(x)

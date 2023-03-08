@@ -12,6 +12,24 @@ merci
 
 se bizarre
 
+JIThub 
+
+oui oui bajuette 
+
+ya cant squeeze blood from a turnip 
+
+burly jangles 
+
+je suis confu 
+
+hwajangsil-i eodieyo michin nyeon
+
+shen me dou hui
+
+mr park
+
+dougan 
+
 
 ### Team Members
 
