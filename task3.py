@@ -86,12 +86,12 @@ def frechet(seriesA, seriesB):
     for i in range(1, len_a + 1):
         for j in range(1, len_b + 1):
             dist = find_dist(seriesA[i-1][0], seriesB[j-1][0], seriesA[i-1][1], seriesB[j-1][1])
-            dp_min  = min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1])
+            dp_min  = min(dp[i-1][j-1][0], dp[i-1][j][0], dp[i][j-1][0])
 
             pointer = float('inf')
-            if dp_min == dp[i - 1][j - 1]:      #diagonal 
+            if dp_min == dp[i - 1][j - 1][0]:      #diagonal 
                 pointer = 0
-            elif dp_min == dp[i - 1][j]:        #up
+            elif dp_min == dp[i - 1][j][0]:        #up
                 pointer = 1
             else:       #left       
                 pointer = -1
@@ -115,8 +115,8 @@ def frechet(seriesA, seriesB):
         else: 
             break
     
-    for x in dp: 
-        print(x)
+    # for x in dp: 
+    #     print(x)
 
     return (dp[len_a][len_b], assign_e[::-1])
 
