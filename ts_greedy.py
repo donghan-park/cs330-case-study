@@ -73,28 +73,17 @@ if __name__ == "__main__":
         plt.plot(x_estimate, y_estimate, color='red', linestyle='dashed', marker='.', markersize=8)
 
     # Read in next four trajectories
-    trajectory_1, trajectory_2, trajectory_3, trajectory_4 = [], [], [], []
-    with open('geolife-cars.csv', newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-        for row in reader:
-            if row[1] == '128-20080503104400':
-                trajectory_1.append((float(row[2]), (float(row[3]))))
-            if row[1] == '010-20081016113953':
-                trajectory_2.append((float(row[2]), (float(row[3]))))
-            if row[1] == '115-20080520225850':
-                trajectory_3.append((float(row[2]), (float(row[3]))))
-            if row[1] == '115-20080615225707':
-                trajectory_4.append((float(row[2]), (float(row[3]))))
-        trajectory_1 = {'128-20080503104400': trajectory_1}
-        trajectory_2 = {'010-20081016113953': trajectory_2}
-        trajectory_3 = {'115-20080520225850': trajectory_3}
-        trajectory_4 = {'115-20080615225707': trajectory_4}
+    for file in ['128-20080503104400', '010-20081016113953', '115-20080520225850', '115-20080615225707']:
+        trajectory = []
+        with open('geolife-cars.csv', newline='') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in reader:
+                if row[1] == file:
+                    trajectory.append((float(row[2]), (float(row[3]))))
 
-    # For each trajectory, report its compression results
-    for trajectory in [trajectory_1, trajectory_2, trajectory_3, trajectory_4]:
-        for id in trajectory:
-            estimate = ts_greedy(trajectory[id], 0.03)
-            print('The compression ratio for trajectory {} is {}'.format(
-                id, len(trajectory[id]) / len(estimate)))
+        # For each trajectory, report its compression results
+        estimate = ts_greedy(trajectory, 0.03)
+        print('The compression ratio for trajectory {} is {}'.format(
+        file, len(trajectory) / len(estimate)))
     
     plt.show()

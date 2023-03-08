@@ -13,7 +13,6 @@ def dtw(seriesA, seriesB):
 
     for i in range(1, len_a + 1):
         for j in range(1, len_b + 1):
-            # print(seriesA[i-1], seriesB[j-1])
             dist = find_dist(seriesA[i - 1][0], seriesB[j - 1][0], seriesA[i - 1][1], seriesB[j - 1][1]) ** 2
             
             size1 = dp[i - 1][j - 1][1] + 1
@@ -50,18 +49,18 @@ def dtw(seriesA, seriesB):
             # dp[i][j] = min(dist, min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]))
     
     assign_e = [(seriesA[len_a - 1], seriesB[len_b - 1])]
-    i = len_a - 1
-    j = len_b - 1
+    i = len_a
+    j = len_b
     while i != 0 and j != 0:
         if dp[i][j][2] == 0: 
-            assign_e.append((seriesA[i-1], seriesB[j-1]))
+            assign_e.append((seriesA[i-2], seriesB[j-2]))
             i -= 1
             j -=1
         elif dp[i][j][2] == 1:
-            assign_e.append((seriesA[i-1], seriesB[j]))
+            assign_e.append((seriesA[i-2], seriesB[j-1]))
             i -= 1
         elif dp[i][j][2] == -1:
-            assign_e.append((seriesA[i], seriesB[j-1]))
+            assign_e.append((seriesA[i-1], seriesB[j-2]))
             j -= 1
         else: 
             break
@@ -73,7 +72,7 @@ def dtw(seriesA, seriesB):
     # for x in dp: 
     #     print(x)
 
-    return dp[len_a][len_b]
+    return (dp[len_a][len_b][0], assign_e[::-1])
 
 def frechet(seriesA, seriesB):
     len_a = len(seriesA)
@@ -99,18 +98,18 @@ def frechet(seriesA, seriesB):
 
         
     assign_e = [(seriesA[len_a - 1], seriesB[len_b - 1])]
-    i = len_a - 1
-    j = len_b - 1
+    i = len_a
+    j = len_b
     while i != 0 and j != 0:
         if dp[i][j][1] == 0: 
-            assign_e.append((seriesA[i-1], seriesB[j-1]))
+            assign_e.append((seriesA[i-2], seriesB[j-2]))
             i -= 1
             j -=1
         elif dp[i][j][1] == 1:
-            assign_e.append((seriesA[i-1], seriesB[j]))
+            assign_e.append((seriesA[i-2], seriesB[j-1]))
             i -= 1
         elif dp[i][j][1] == -1:
-            assign_e.append((seriesA[i], seriesB[j-1]))
+            assign_e.append((seriesA[i-1], seriesB[j-2]))
             j -= 1
         else: 
             break
@@ -118,7 +117,7 @@ def frechet(seriesA, seriesB):
     # for x in dp: 
     #     print(x)
 
-    return (dp[len_a][len_b], assign_e[::-1])
+    return (dp[-1][-1][0], assign_e[::-1])
 
 def find_dist(x1, x2, y1, y2):
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
@@ -146,8 +145,16 @@ def main():
         plt.figure(idx + 1)
         counts, bins = np.histogram(frechet_distance)
         plt.hist(bins[:-1], bins, weights=counts)
-        print(frechet_distance[0])
-        # dtw(trajectory_1, trajectory_2)
+        print(frechet_result[0])
+
+           
+        dtw_result = dtw(trajectory_1, trajectory_2)
+        dtw_distance = [find_dist_points(p,q) for p,q in dtw_result[1]]
+        
+        plt.figure(idx + 4)
+        counts, bins = np.histogram(dtw_distance)
+        plt.hist(bins[:-1], bins, weights=counts)
+        print(dtw_result[0])
     plt.show()
 
 if __name__ == "__main__":
