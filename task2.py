@@ -1,7 +1,9 @@
 import csv
 import matplotlib.pyplot as plt
 
-
+# Runtime O(nlogn): It estimates the path as the left and rightmost points. Then iterates through
+# all points in the trajectory segment, finds point furthest away from the estimate, and then recursively
+# splits the trajectory into two parts at that point.
 def ts_greedy(trajectory, max_error):
     # Current estimate is leftmost and rightmost points
     estimate = [trajectory[0], trajectory[-1]]
@@ -23,6 +25,7 @@ def ts_greedy(trajectory, max_error):
         return ts_greedy(trajectory[0:error_index + 1], max_error) + ts_greedy(trajectory[error_index:], max_error)[1:]
 
 
+# Runtime O(1): It calculates the minimum distance to a line segment e from a point q
 def compute(q, e):
     # http://paulbourke.net/geometry/pointlineplane/ #
     # Find the x and y distances of the two points on the line
