@@ -2,6 +2,7 @@ import math
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
+from task2 import ts_greedy
 
 # Runtime: O(mn). To construct the dp table, iterate through all the points
 # in trajectory p, and for each iteration, iterate through all the points
@@ -124,34 +125,70 @@ def find_dist_points(p, q):
     return math.sqrt((q[0] - p[0])**2 + (q[1] - p[1])**2)
 
 def main():
-    for idx, (file1, file2) in enumerate([('128-20080503104400', '128-20080509135846'), ('010-20081016113953', '010-20080923124453'), ('115-20080520225850', '115-20080615225707')]):
-        trajectory_1, trajectory_2 = [], []
-        with open('geolife-cars.csv', newline='') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-            for row in reader:
-                if row[1] == file1:
-                    trajectory_1.append((float(row[2]), (float(row[3]))))
-                if row[1] == file2:
-                    trajectory_2.append((float(row[2]), (float(row[3]))))
+    # for idx, (file1, file2) in enumerate([('128-20080503104400', '128-20080509135846'), ('010-20081016113953', '010-20080923124453'), ('115-20080520225850', '115-20080615225707')]):
+    #     trajectory_1, trajectory_2 = [], []
+    #     with open('geolife-cars.csv', newline='') as csvfile:
+    #         reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+    #         for row in reader:
+    #             if row[1] == file1:
+    #                 trajectory_1.append((float(row[2]), (float(row[3]))))
+    #             if row[1] == file2:
+    #                 trajectory_2.append((float(row[2]), (float(row[3]))))
    
-        frechet_result = frechet(trajectory_1, trajectory_2)
-        frechet_distance = [find_dist_points(p,q) for p,q in frechet_result[1]]
+    #     frechet_result = frechet(trajectory_1, trajectory_2)
+    #     frechet_distance = [find_dist_points(p,q) for p,q in frechet_result[1]]
         
-        plt.figure(idx + 1)
-        counts, bins = np.histogram(frechet_distance)
-        plt.hist(bins[:-1], bins, weights=counts)
-        print(frechet_result[0])
+    #     plt.figure(idx + 1)
+    #     plt.title('Edges in $E_{{avg}}$ and $E_{{max}}$ between {} and {}'.format(file1, file2))
+    #     plt.xlabel('Length of edges in km')
+    #     plt.ylabel('Frequency')
 
+    #     counts, bins = np.histogram(frechet_distance)
+    #     plt.hist(bins[:-1], bins, alpha=0.7, label='$E_{max}$', weights=counts)
+    #     print('E_max between trajectories {} and {}: {}'.format(file1, file2, frechet_result[0]))
            
-        dtw_result = dtw(trajectory_1, trajectory_2)
-        dtw_distance = [find_dist_points(p,q) for p,q in dtw_result[1]]
+    #     dtw_result = dtw(trajectory_1, trajectory_2)
+    #     dtw_distance = [find_dist_points(p,q) for p,q in dtw_result[1]]
         
-        plt.figure(idx + 4)
-        counts, bins = np.histogram(dtw_distance)
-        plt.hist(bins[:-1], bins, weights=counts)
-        print(dtw_result[0])
+    #     counts, bins = np.histogram(dtw_distance)
+    #     plt.hist(bins[:-1], bins, alpha=0.7, label='$E_{avg}$', weights=counts)
+    #     print('E_avg between trajectories {} and {}: {}'.format(file1, file2, dtw_result[0]))
+        
+    #     plt.legend()
     
     file1, file2 = '115-20080520225850', '115-20080615225707'
+    trajectory1, trajectory2 = [], []
+    with open('geolife-cars.csv', newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        for row in reader:
+            if row[1] == file1:
+                trajectory1.append((float(row[2]), (float(row[3]))))
+            if row[1] == file2:
+                trajectory2.append((float(row[2]), (float(row[3]))))
+
+    # Estimate path and plot
+    dtw_distances = []
+    for error in [0.03, 0.1, 0.3]:
+        estimate1 = ts_greedy(trajectory1, error)
+        estimate2 = ts_greedy(trajectory2, error)
+        dtw_result = dtw(estimate1, estimate2)
+        dtw_distances.append([find_dist_points(p,q) for p,q in dtw_result[1]])
+        print('E_avg between trajectories {} and {} with error {}: {}'.format(file1, file2, error, dtw_result[0]))
+
+    plt.figure(4)
+    plt.title('Edges in $E_{{avg}}$ between {} and {} including outlier'.format(file1, file2))
+    plt.xlabel('Length of edges in km')
+    plt.ylabel('Frequency')
+    plt.hist(dtw_distances, bins=10, label=['Error of {} km'.format(error) for error in [0.03, 0.1, 0.3]], range=(0,0.45))
+    plt.legend()
+
+    plt.figure(5)
+    plt.title('Edges in $E_{{avg}}$ between {} and {} excluding outlier'.format(file1, file2))
+    plt.xlabel('Length of edges in km')
+    plt.ylabel('Frequency')
+    plt.hist(dtw_distances, bins=10, label=['Error of {} km'.format(error) for error in [0.03, 0.1, 0.3]], range=(0,0.15))
+    plt.legend()
+
     plt.show()
 
 if __name__ == "__main__":
