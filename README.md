@@ -1,36 +1,5 @@
 # cs330-case-study
 
-hey yall 
-
-fulllllllll
-
-samilicious mr boutouis
-
-jem le poisson o le croissant
-
-merci
-
-se bizarre
-
-JIThub 
-
-oui oui bajuette 
-
-ya cant squeeze blood from a turnip 
-
-burly jangles 
-
-je suis confu 
-
-hwajangsil-i eodieyo michin nyeon
-
-shen me dou hui
-
-mr park
-
-dougan 
-
-
 ### Team Members
 
 * Samy Boutouis (sb590)
@@ -39,6 +8,10 @@ dougan
 * Donghan Park (dp239)
 
 ### Files
-* `task1.py`: file for task 1 [description]
-* `ts_greedy.py`: file for task 2 [description]
-* `task3.py`: file for task 3 [description]
+* `task1.py`: file for task 1: contains `denisty` and `hubs` functions
+* `task2.py`: file for task 2: contains `ts_greedy` function
+* `task3.py`: file for task 3: contains `frechet` and `distance` functions
+* `geolife-cars.csv` contains coordinates of all the trajectories
+
+### Execution Instructions
+Run the python files.

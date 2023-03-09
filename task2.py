@@ -72,8 +72,12 @@ if __name__ == "__main__":
         x_estimate = [point[0] for point in estimate]
         y_estimate = [point[1] for point in estimate]
         plt.figure(idx + 1)
-        plt.plot(x_trajectory, y_trajectory, color='black', marker='.', markersize=8)
-        plt.plot(x_estimate, y_estimate, color='red', linestyle='dashed', marker='.', markersize=8)
+        plt.title('Trajectory 128-20080503104400 and Estimate Using Error of {} km'.format(error))
+        plt.xlabel('X in km')
+        plt.ylabel('Y in km')
+        plt.plot(x_trajectory, y_trajectory, color='black', label='Trajectory', marker='.', markersize=8)
+        plt.plot(x_estimate, y_estimate, color='red', label='Estimate'.format(error), linestyle='dashed', marker='.', markersize=8)
+        plt.legend()
 
     # Read in next four trajectories
     for file in ['128-20080503104400', '010-20081016113953', '115-20080520225850', '115-20080615225707']:

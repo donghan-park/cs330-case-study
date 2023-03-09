@@ -135,8 +135,8 @@ if __name__ == "__main__":
     # == Bullet 1: scatterplot ==
     k = 10
     r = 8
-    tree = KDTree(P, density_r)
     start_time = time.time()
+    tree = KDTree(P, density_r)
     hubs = tree.hubs(P, k, r)
     run_time = time.time() - start_time
     print('[k = {}, r = {}]'.format(k, r))
