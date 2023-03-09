@@ -125,37 +125,39 @@ def find_dist_points(p, q):
     return math.sqrt((q[0] - p[0])**2 + (q[1] - p[1])**2)
 
 def main():
-    # for idx, (file1, file2) in enumerate([('128-20080503104400', '128-20080509135846'), ('010-20081016113953', '010-20080923124453'), ('115-20080520225850', '115-20080615225707')]):
-    #     trajectory_1, trajectory_2 = [], []
-    #     with open('geolife-cars.csv', newline='') as csvfile:
-    #         reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-    #         for row in reader:
-    #             if row[1] == file1:
-    #                 trajectory_1.append((float(row[2]), (float(row[3]))))
-    #             if row[1] == file2:
-    #                 trajectory_2.append((float(row[2]), (float(row[3]))))
+    # Calculate frechet and DTW alignments of three pairs of trajectories
+    for idx, (file1, file2) in enumerate([('128-20080503104400', '128-20080509135846'), ('010-20081016113953', '010-20080923124453'), ('115-20080520225850', '115-20080615225707')]):
+        trajectory_1, trajectory_2 = [], []
+        with open('geolife-cars.csv', newline='') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in reader:
+                if row[1] == file1:
+                    trajectory_1.append((float(row[2]), (float(row[3]))))
+                if row[1] == file2:
+                    trajectory_2.append((float(row[2]), (float(row[3]))))
    
-    #     frechet_result = frechet(trajectory_1, trajectory_2)
-    #     frechet_distance = [find_dist_points(p,q) for p,q in frechet_result[1]]
+        frechet_result = frechet(trajectory_1, trajectory_2)
+        frechet_distance = [find_dist_points(p,q) for p,q in frechet_result[1]]
         
-    #     plt.figure(idx + 1)
-    #     plt.title('Edges in $E_{{avg}}$ and $E_{{max}}$ between {} and {}'.format(file1, file2))
-    #     plt.xlabel('Length of edges in km')
-    #     plt.ylabel('Frequency')
+        plt.figure(idx + 1)
+        plt.title('Edges in $E_{{avg}}$ and $E_{{max}}$ between {} and {}'.format(file1, file2))
+        plt.xlabel('Length of edges in km')
+        plt.ylabel('Frequency')
 
-    #     counts, bins = np.histogram(frechet_distance)
-    #     plt.hist(bins[:-1], bins, alpha=0.7, label='$E_{max}$', weights=counts)
-    #     print('E_max between trajectories {} and {}: {}'.format(file1, file2, frechet_result[0]))
+        counts, bins = np.histogram(frechet_distance)
+        plt.hist(bins[:-1], bins, alpha=0.7, label='$E_{max}$', weights=counts)
+        print('E_max between trajectories {} and {}: {}'.format(file1, file2, frechet_result[0]))
            
-    #     dtw_result = dtw(trajectory_1, trajectory_2)
-    #     dtw_distance = [find_dist_points(p,q) for p,q in dtw_result[1]]
+        dtw_result = dtw(trajectory_1, trajectory_2)
+        dtw_distance = [find_dist_points(p,q) for p,q in dtw_result[1]]
         
-    #     counts, bins = np.histogram(dtw_distance)
-    #     plt.hist(bins[:-1], bins, alpha=0.7, label='$E_{avg}$', weights=counts)
-    #     print('E_avg between trajectories {} and {}: {}'.format(file1, file2, dtw_result[0]))
+        counts, bins = np.histogram(dtw_distance)
+        plt.hist(bins[:-1], bins, alpha=0.7, label='$E_{avg}$', weights=counts)
+        print('E_avg between trajectories {} and {}: {}'.format(file1, file2, dtw_result[0]))
         
-    #     plt.legend()
+        plt.legend()
     
+    # Run estimates of two trajectories and run a DTW alignment on them
     file1, file2 = '115-20080520225850', '115-20080615225707'
     trajectory1, trajectory2 = [], []
     with open('geolife-cars.csv', newline='') as csvfile:
