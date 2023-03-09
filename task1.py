@@ -98,35 +98,35 @@ if __name__ == "__main__":
     density_r = 1
 
     # == Bullet 1: scatterplot ==
-    # k = 10
-    # r = 8
-    # tree = KDTree(P, density_r)
-    # start_time = time.time()
-    # hubs = tree.hubs(P, k, r)
-    # run_time = time.time() - start_time
-    # print('[k = {}, r = {}]'.format(k, r))
-    # print("Runtime: {:.0f} ms".format(run_time * 1000))
-    # plot_hubs(P, hubs, r, 'Plot of hubs and points of $\mathcal{P}$ (k=10, r=8)')
+    k = 10
+    r = 8
+    tree = KDTree(P, density_r)
+    start_time = time.time()
+    hubs = tree.hubs(P, k, r)
+    run_time = time.time() - start_time
+    print('[k = {}, r = {}]'.format(k, r))
+    print("Runtime: {:.0f} ms".format(run_time * 1000))
+    plot_hubs(P, hubs, r, 'Plot of hubs and points of $\mathcal{P}$ (k=10, r=8)')
 
     # == Bullet 2: run hubs() with varying k ==
-    # ks = [5, 10, 20, 40]
-    # r = 2
-    # tree = KDTree(P, density_r)
-    # for k in ks:
-    #     print("[k = {}, r = {}]".format(k, r))
-    #     for i in range(3):
-    #         start_time = time.time()
-    #         hubs = tree.hubs(P, k, r)
-    #         run_time = time.time() - start_time
-    #         print("{}) Runtime: {:.0f} ms".format(i + 1, run_time * 1000))
+    ks = [5, 10, 20, 40]
+    r = 2
+    tree = KDTree(P, density_r)
+    for k in ks:
+        print("[k = {}, r = {}]".format(k, r))
+        for i in range(3):
+            start_time = time.time()
+            hubs = tree.hubs(P, k, r)
+            run_time = time.time() - start_time
+            print("{}) Runtime: {:.0f} ms".format(i + 1, run_time * 1000))
     
     # == Bullet 3: run hubs() with subsamples ==
-    # k = 10
-    # r = 8
-    # subsets = [P_10, P_30, P_60, P]
-    # for subset in subsets:
-    #     tree = KDTree(subset, density_r)
-    #     start_time = time.time()
-    #     hubs = tree.hubs(subset, k, r)
-    #     run_time = time.time() - start_time
-    #     print("Runtime: {:.0f} ms".format(run_time * 1000))
+    k = 10
+    r = 8
+    subsets = [P_10, P_30, P_60, P]
+    for subset in subsets:
+        tree = KDTree(subset, density_r)
+        start_time = time.time()
+        hubs = tree.hubs(subset, k, r)
+        run_time = time.time() - start_time
+        print("Runtime: {:.0f} ms".format(run_time * 1000))
