@@ -1,5 +1,6 @@
 import csv
 import matplotlib.pyplot as plt
+from task2 import ts_greedy
 from task3 import dtw
 
 def approach_1(trajectories):
@@ -61,10 +62,6 @@ def main():
                 id = row[0]
                 if id in trajectories:
                     trajectories[id].append((float(row[1]), (float(row[2]))))
-
-    t = []
-    for trajectory in trajectories:
-        t.append(trajectories[trajectory])
     
     plt.figure(1)
     for trajectory in trajectories:
@@ -75,10 +72,9 @@ def main():
         plt.ylabel('Y in km')
         plt.plot(x_trajectory, y_trajectory, color='black', marker='.', markersize=8)
     
-    # approach_1_center = approach_1(t)
-    # x_trajectory = [point[0] for point in approach_1_center]
-    # y_trajectory = [point[1] for point in approach_1_center]
-    # plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
+    t = []
+    for trajectory in trajectories:
+        t.append(trajectories[trajectory])
 
     approach_2_center = approach_2(t)
     x_trajectory = [point[0] for point in approach_2_center]
@@ -86,6 +82,19 @@ def main():
     plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
 
     plt.show()
+    
+    # approach_1_center = approach_1(t)
+    # x_trajectory = [point[0] for point in approach_1_center]
+    # y_trajectory = [point[1] for point in approach_1_center]
+    # plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
+
+    for error in [0.03, 0.1, 0.3]:
+        for i, trajectory in enumerate(trajectories):
+            t[i] = ts_greedy(trajectories[trajectory], error)
+        # approach_1_center = approach_1(t)
+        # x_trajectory = [point[0] for point in approach_1_center]
+        # y_trajectory = [point[1] for point in approach_1_center]
+        # plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
 
 if __name__ == '__main__':
     main()
