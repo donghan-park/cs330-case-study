@@ -4,14 +4,20 @@ from task2 import ts_greedy
 from task3 import dtw
 
 def approach_1(trajectories):
+    # Initialize a table to store the pairwise distances between trajectories
     table = [[0 for j in range(len(trajectories))] for i in range(len(trajectories))]
+    
+    # Compute the pairwise distances between trajectories using DTW and store them in the table
     for i in range(len(trajectories)):
         for j in range(len(trajectories)):
+            # Only compute the distance if the trajectories are different and the distance has not been computed before
             if i != j and not table[i][j]:
+                # Compute the DTW distance between the two trajectories and store it in the table
                 distance = dtw(trajectories[i], trajectories[j])[0]
                 table[i][j] = distance
                 table[j][i] = distance
     
+    # Find the trajectory with the minimum sum of distances to all other trajectories
     min_sum = float('inf')
     min_trajectory = -1
     for trajectory in range(len(trajectories)):
@@ -20,6 +26,7 @@ def approach_1(trajectories):
             min_sum = distance_sum
             min_trajectory = trajectory
     
+    # Return the trajectory with the minimum sum of distances as the center trajectory
     return trajectories[min_trajectory]
 
 def approach_2(trajectories):
@@ -82,7 +89,7 @@ def main():
     plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
 
     plt.show()
-    
+
     # approach_1_center = approach_1(t)
     # x_trajectory = [point[0] for point in approach_1_center]
     # y_trajectory = [point[1] for point in approach_1_center]
