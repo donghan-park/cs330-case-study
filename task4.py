@@ -50,6 +50,16 @@ def approach_2(trajectories):
     return mean_trajectory
 
 
+def plot_original_trajectories(t):
+    for trajectory in t:
+        x_trajectory = [point[0] for point in trajectory]
+        y_trajectory = [point[1] for point in trajectory]
+        plt.title('Trajectories')
+        plt.xlabel('X in km')
+        plt.ylabel('Y in km')
+        plt.plot(x_trajectory, y_trajectory, color='black', marker='.', markersize=8)
+        
+
 def main():
     with open('trajectory-ids.txt', 'r') as file:
         trajectory_ids = [line.rstrip() for line in file]
@@ -68,33 +78,30 @@ def main():
         t.append(trajectories[trajectory])
 
     plt.figure(1)
-    for trajectory in t:
-        x_trajectory = [point[0] for point in trajectory]
-        y_trajectory = [point[1] for point in trajectory]
-        plt.title('Trajectories')
-        plt.xlabel('X in km')
-        plt.ylabel('Y in km')
-        plt.plot(x_trajectory, y_trajectory, color='black', marker='.', markersize=8)
-
+    plot_original_trajectories(t)
     approach_2_center = approach_2(t)
     x_trajectory = [point[0] for point in approach_2_center]
     y_trajectory = [point[1] for point in approach_2_center]
     plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
 
+    plt.figure(2)
+    plot_original_trajectories(t)
+    approach_1_center = approach_1(t)
+    x_trajectory = [point[0] for point in approach_1_center]
+    y_trajectory = [point[1] for point in approach_1_center]
+    plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
     plt.show()
 
-    # approach_1_center = approach_1(t)
-    # x_trajectory = [point[0] for point in approach_1_center]
-    # y_trajectory = [point[1] for point in approach_1_center]
-    # plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
-
-    for error in [0.03, 0.1, 0.3]:
+    for idx, error in enumerate([0.03, 0.1, 0.3]):
         for i, trajectory in enumerate(trajectories):
             t[i] = ts_greedy(trajectories[trajectory], error)
-        # approach_1_center = approach_1(t)
-        # x_trajectory = [point[0] for point in approach_1_center]
-        # y_trajectory = [point[1] for point in approach_1_center]
-        # plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
+        plt.figure(idx + 3)
+        plot_original_trajectories(t)
+        approach_1_center = approach_1(t)
+        x_trajectory = [point[0] for point in approach_1_center]
+        y_trajectory = [point[1] for point in approach_1_center]
+        plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
+
 
 if __name__ == '__main__':
     main()
