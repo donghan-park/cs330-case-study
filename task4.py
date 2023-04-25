@@ -31,27 +31,7 @@ def approach_1(trajectories):
     return trajectories[min_trajectory]
 
 
-def approach_2_fast(trajectories):
-    # Find the maximum length of all trajectories
-    max_len = max(len(traj) for traj in trajectories)
-    
-    # Resample all trajectories to have the same number of points using linear interpolation
-    resampled_trajectories = []
-    for traj in trajectories:
-        traj = np.array(traj)
-        resampled_traj = np.zeros((max_len, traj.shape[1]))
-        for dim in range(traj.shape[1]):
-            resampled_traj[:, dim] = np.interp(np.linspace(0, max_len, num=max_len), np.arange(len(traj)), traj[:, dim])
-        resampled_trajectories.append(resampled_traj)
-
-    # Compute the mean trajectory
-    mean_trajectory = np.mean(resampled_trajectories, axis=0)
-
-    # Return the mean trajectory
-    return mean_trajectory
-
-
-def approach_2_slow(trajectories):
+def approach_2(trajectories):
     max_len = max(len(traj) for traj in trajectories)
     # Initialize an array to store the interpolated trajectories
     interpolated_trajectories = np.zeros((len(trajectories), max_len, 2))
@@ -131,7 +111,7 @@ def main():
     plot_original_trajectories(t)
 
     # Apply approach 2 to find the center trajectory and calculate the average distance between each trajectory and the center
-    approach_2_center = approach_2_slow(t)
+    approach_2_center = approach_2(t)
     distance_sum = 0
     for trajectory in t:
         distance_sum += dtw(approach_2_center, trajectory)[0]
