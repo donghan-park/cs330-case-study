@@ -90,7 +90,6 @@ def main():
     x_trajectory = [point[0] for point in approach_1_center]
     y_trajectory = [point[1] for point in approach_1_center]
     plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
-    plt.show()
 
     for idx, error in enumerate([0.03, 0.1, 0.3]):
         for i, trajectory in enumerate(trajectories):
@@ -101,6 +100,8 @@ def main():
         x_trajectory = [point[0] for point in approach_1_center]
         y_trajectory = [point[1] for point in approach_1_center]
         plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
+    
+    plt.show()
 
 
 if __name__ == '__main__':
