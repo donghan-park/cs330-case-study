@@ -1,8 +1,10 @@
 import numpy as np
 import csv
+from task2 import ts_greedy
 from task3 import dtw
 from task4 import approach_2
 import random
+import matplotlib.pyplot as plt
 
 """
     high-level:
@@ -45,13 +47,24 @@ def lloyds_algorithm(T, k, tmax, sm):
         indices = np.arange(n)
         np.random.shuffle(indices)
         partition_size = n // k
-        partitions = [
-            T[indices[i*partition_size:(i+1)*partition_size]] for i in range(k)]
-        partitions[-1] = np.concatenate([partitions[-1],
-                                        T[indices[k*partition_size:]]])
+        partitions = []
+        used_indices = set()
+        for i in range(k): 
+            p = []
+            for j in indices[i*partition_size : (i+1)*partition_size]: 
+                used_indices.add(j)
+                p.append(T[j])
+            partitions.append(p)
+        
+        last_partition = []
+        for i in range(n):
+            if i not in used_indices:
+                last_partition.append(T[i])
+
+        partitions[-1] = np.concatenate([partitions[-1], last_partition])
 
     # k-centers seeding method initial partition
-    if sm == "k-centers":
+    if sm == "kcenters":
         sc = seed_centers(T, k)
         for t in T:
             min_dist = float('inf')
@@ -63,7 +76,7 @@ def lloyds_algorithm(T, k, tmax, sm):
                     min_index = k0
             partitions[min_index].append(t)
 
-    for _ in tmax:
+    for _ in range(tmax):
         # calculate centers
         centers = [approach_2(partitions[j]) for j in range(k)]
         new_partitions = [[] for _ in range(k)]
@@ -87,10 +100,22 @@ def lloyds_algorithm(T, k, tmax, sm):
 
     return partitions
 
+def calc_cost(T, k_list, tmax, sm):
+    cost_list = []
+    for k in k_list:
+        clusters = lloyds_algorithm(T, k, tmax, sm)
+        centers = [approach_2(clusters[j]) for j in range(k)]
+        # calculate cost 
+        costs = []
+        for i in range(k): 
+            costs_i = np.sum([dtw(t, centers[i])[0] for t in clusters[i]])
+            costs.append(costs_i)
+        cost = np.sum(costs)
+        cost_list.append(cost)
+    return cost_list
 
 if __name__ == "__main__":
     k_list = [4, 6, 8, 10, 12]
-    k = 3
 
     # Read in a list of trajectory IDs from a text file
     with open('trajectory-ids.txt', 'r') as file:
@@ -111,16 +136,19 @@ if __name__ == "__main__":
     T = []
     for trajectory in trajectories:
         T.append(trajectories[trajectory])
-
-    sms = ["random", "k-centers"]
+    # Simplify the trajectory using ts_greedy
+    for i, trajectory in enumerate(T):
+        T[i] = ts_greedy(T[i], 0.1)
+        
     tmax = 1
-    centers = seed_centers(T, k)
-    for sm in sms:
-        for k in k_list:
-            clusters = lloyds_algorithm(T, k, tmax, sm)
-            centers = [approach_2(clusters[j]) for j in range(k)]
-            # calculate cost 
-            costs = []
-            for i in range(len(clusters)): 
-                cost = dtw(centers[i], )
+    random_costs = calc_cost(T, k_list, tmax, "random")
+    kcenters_costs = calc_cost(T, k_list, tmax, "kcenters")
+
+    plt.figure(1)
+    plt.plot(k_list, random_costs, color="red", label="random", linestyle='dashed', marker='.', markersize=2)
+    plt.plot(k_list, kcenters_costs, color="black", label="kcenters", linestyle='dashed', marker='.', markersize=2)
+    
+    plt.show()
+
+
 
