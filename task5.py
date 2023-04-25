@@ -3,6 +3,7 @@ import csv
 from task2 import ts_greedy
 from task3 import dtw
 from task4 import approach_2
+# from task4 import plot_original_trajectories
 import random
 import matplotlib.pyplot as plt
 
@@ -38,6 +39,19 @@ def seed_centers(T, k):
 
     return centers
 
+def plot_original_trajectories(t, c):
+    # This function takes a list of trajectories as input and plots them
+    # Each trajectory is represented as a list of points
+    for trajectory in t:
+        # Extract the X and Y coordinates for each point in the trajectory
+        x_trajectory = [point[0] for point in trajectory]
+        y_trajectory = [point[1] for point in trajectory]
+        # Set the title, x-axis label, and y-axis label for the plot
+        plt.title('Trajectories')
+        plt.xlabel('X (km)')
+        plt.ylabel('Y (km)')
+        # Plot the trajectory using a black line with small dot markers
+        plt.plot(x_trajectory, y_trajectory, color=c, label='Original Trajectory', marker='.', markersize=2, alpha=0.35)
 
 def lloyds_algorithm(T, k, tmax, sm):
     partitions = []
@@ -65,45 +79,88 @@ def lloyds_algorithm(T, k, tmax, sm):
 
     # k-centers seeding method initial partition
     if sm == "kcenters":
+        partitions = [[] for _ in range(k)]
         sc = seed_centers(T, k)
-        for t in T:
+
+        for t in T: 
             min_dist = float('inf')
             min_index = -1
             for k0 in range(k):
-                dist = dtw(tr, sc[k0])[0]
+                dist = dtw(t, sc[k0])[0] # calculate distance between current trajectory and kth center, k times
                 if dist < min_dist:
                     min_dist = dist
                     min_index = k0
-            partitions[min_index].append(t)
+            if partitions[min_index] is None: 
+                partitions[min_index] = t
+            else: 
+                partitions[min_index].append(t)
 
     for _ in range(tmax):
         # calculate centers
-        centers = [approach_2(partitions[j]) for j in range(k)]
+        centers = []
+        for j in range(k): 
+            # print("HELLO", j, partitions[j])
+            # print(approach_2(partitions[j]))
+            if len(partitions[j]) > 0: 
+                centers.append(approach_2(partitions[j]))
+            else: 
+                centers.append(temp[j])
+        # centers = [approach_2(partitions[j]) for j in range(k)]
+        # plt.figure(1)
+        # plot_original_trajectories(centers, "black")
+        # plt.show()
+
         new_partitions = [[] for _ in range(k)]
 
+        # # for each cluster, calculate dist from trajectory in that cluster to each every center 
+        # # if distance is less, add to that center's corresponding cluster and remove from current cluster
+        # for k0 in range(k): 
+        #     for tr in partitions[k0]: 
+        #         min_dist = float('inf')
+        #         min_index = -1
+        #         for k1 in range(k): 
+        #             dist = dtw(tr, centers[k1])[0]
+        #             if dist < min_dist:
+        #                 min_dist = dist
+        #                 min_index = k0
+        #         if partitions[min_index] is None: 
+        #             partitions[k0].remove(t)
+        #             new_partitions[min_index] = t
+        #         else: 
+        #             partitions[k0].remove(t)
+        #             new_partitions[min_index].append(t)
+                    
         # calculate dtw distances for each trajectory to each center, pick smallest and add to new partitions
         for tr in T:
             min_dist = float('inf')
             min_index = -1
             for k0 in range(k):
                 dist = dtw(tr, centers[k0])[0]
+                # print(k0, dist)
                 if dist < min_dist:
                     min_dist = dist
                     min_index = k0
-            new_partitions[min_index].append(tr)
+            if new_partitions[min_index] is None: 
+                new_partitions[min_index] = tr
+            else: 
+                new_partitions[min_index].append(tr)
 
         # Check for convergence
         if partitions == new_partitions:
             break
 
         partitions = new_partitions
+        temp = centers
+        # print(_, partitions)
+        # for p in partitions: 
+        #     print(len(p))
 
     return partitions
 
 def calc_cost(T, k_list, tmax, sm):
     cost_list = []
     for k in k_list:
-        clusters = lloyds_algorithm(T, k, tmax, sm)
+        clusters = lloyds_algorithm(T, k, tmax, sm) #returns list of list of lists 
         centers = [approach_2(clusters[j]) for j in range(k)]
         # calculate cost 
         costs = []
@@ -139,14 +196,16 @@ if __name__ == "__main__":
     # Simplify the trajectory using ts_greedy
     for i, trajectory in enumerate(T):
         T[i] = ts_greedy(T[i], 0.1)
-        
-    tmax = 1
-    random_costs = calc_cost(T, k_list, tmax, "random")
-    kcenters_costs = calc_cost(T, k_list, tmax, "kcenters")
+    
+    for k in k_list: 
+        print(lloyds_algorithm(T, k, 10, "kcenters"))
+    tmax = 10
+    # # random_costs = calc_cost(T, k_list, tmax, "random")
+    # kcenters_costs = calc_cost(T, k_list, tmax, "kcenters")
 
-    plt.figure(1)
-    plt.plot(k_list, random_costs, color="red", label="random", linestyle='dashed', marker='.', markersize=2)
-    plt.plot(k_list, kcenters_costs, color="black", label="kcenters", linestyle='dashed', marker='.', markersize=2)
+    # plt.figure(1)
+    # # plt.plot(k_list, random_costs, color="red", label="random", linestyle='dashed', marker='.', markersize=2)
+    # plt.plot(k_list, kcenters_costs, color="black", label="kcenters", linestyle='dashed', marker='.', markersize=2)
     
     plt.show()
 
