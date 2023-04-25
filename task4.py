@@ -51,21 +51,41 @@ def approach_2(trajectories):
 
 
 def plot_original_trajectories(t):
+    # This function takes a list of trajectories as input and plots them
+    # Each trajectory is represented as a list of points
     for trajectory in t:
+        # Extract the X and Y coordinates for each point in the trajectory
         x_trajectory = [point[0] for point in trajectory]
         y_trajectory = [point[1] for point in trajectory]
+        # Set the title, x-axis label, and y-axis label for the plot
         plt.title('Trajectories')
         plt.xlabel('X (km)')
         plt.ylabel('Y (km)')
-        plt.plot(x_trajectory, y_trajectory, color='black', marker='.', markersize=2)
+        # Plot the trajectory using a black line with small dot markers
+        plt.plot(x_trajectory, y_trajectory, color='black', label='Original Trajectory', marker='.', markersize=2)
+
+
+
+def plot_legend():
+    # This function generates a legend for the plot based on the labels used in plt.plot() calls
+    handles, labels = plt.gca().get_legend_handles_labels()
+    newLabels, newHandles = [], []
+    for handle, label in zip(handles, labels):
+        if label not in newLabels:
+            newLabels.append(label)
+            newHandles.append(handle)
+    plt.legend(newHandles, newLabels)
         
 
 def main():
+    # Read in a list of trajectory IDs from a text file
     with open('trajectory-ids.txt', 'r') as file:
         trajectory_ids = [line.rstrip() for line in file]
+    # Create a dictionary to hold the trajectories for each ID
     trajectories = {}
     for trajectory_id in trajectory_ids:
         trajectories[trajectory_id] = []
+    # Read in the trajectory data from a CSV file and add each point to the appropriate trajectory
     with open('geolife-cars-upd8.csv', newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in reader:
@@ -73,33 +93,59 @@ def main():
                 if id in trajectories:
                     trajectories[id].append((float(row[1]), (float(row[2]))))
     
+    # Convert the dictionary of trajectories to a list of trajectory lists
     t = []
     for trajectory in trajectories:
         t.append(trajectories[trajectory])
 
+    # Plot the original trajectories
     plt.figure(1)
     plot_original_trajectories(t)
+
+    # Apply approach 2 to find the center trajectory and calculate the average distance between each trajectory and the center
     approach_2_center = approach_2(t)
+    distance_sum = 0
+    for trajectory in t:
+        distance_sum += dtw(approach_2_center, trajectory)[0]
+    print("Average distance for approach 2: {}".format(distance_sum / len(t)))
+    # Plot the center trajectory in red with a dashed line
     x_trajectory = [point[0] for point in approach_2_center]
     y_trajectory = [point[1] for point in approach_2_center]
-    plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=2)
+    plt.plot(x_trajectory, y_trajectory, color='red', label='Center Trajectory', linestyle='dashed', marker='.', markersize=2)
+    # Add a legend to the plot
+    plot_legend()
 
+    # Repeat the process for approach 1, then plot the results
     plt.figure(2)
     plot_original_trajectories(t)
     approach_1_center = approach_1(t)
+    distance_sum = 0
+    for trajectory in t:
+        distance_sum += dtw(approach_1_center, trajectory)[0]
+    print("Average distance for approach 1: {}".format(distance_sum / len(t)))
+    # Plot the center trajectory in red with a dashed line
     x_trajectory = [point[0] for point in approach_1_center]
     y_trajectory = [point[1] for point in approach_1_center]
-    plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=2)
+    plt.plot(x_trajectory, y_trajectory, color='red', label='Center Trajectory', linestyle='dashed', marker='.', markersize=2)
+    # Add a legend to the plot
+    plot_legend()
 
+    # Repeat the process for approach 1 after simplifying the trajectory, then plot the results 
     for idx, error in enumerate([0.03, 0.1, 0.3]):
+        # Simplify the trajectory using ts_greedy
         for i, trajectory in enumerate(trajectories):
             t[i] = ts_greedy(trajectories[trajectory], error)
         plt.figure(idx + 3)
         plot_original_trajectories(t)
         approach_1_center = approach_1(t)
+        distance_sum = 0
+        for trajectory in t:
+            distance_sum += dtw(approach_1_center, trajectory)[0]
+        print("Average distance for approach 1 with error {}: {}".format(error, distance_sum / len(t)))
         x_trajectory = [point[0] for point in approach_1_center]
         y_trajectory = [point[1] for point in approach_1_center]
-        plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=2)
+        plt.plot(x_trajectory, y_trajectory, color='red', label='Center Trajectory', linestyle='dashed', marker='.', markersize=2)
+        plot_legend()
     
     plt.show()
 
