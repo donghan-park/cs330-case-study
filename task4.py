@@ -30,6 +30,7 @@ def approach_1(trajectories):
     # Return the trajectory with the minimum sum of distances as the center trajectory
     return trajectories[min_trajectory]
 
+
 def approach_2(trajectories):
     # Find the maximum length of all trajectories
     max_len = max(len(traj) for traj in trajectories)
@@ -63,7 +64,6 @@ def plot_original_trajectories(t):
         plt.ylabel('Y (km)')
         # Plot the trajectory using a black line with small dot markers
         plt.plot(x_trajectory, y_trajectory, color='black', label='Original Trajectory', marker='.', markersize=2)
-
 
 
 def plot_legend():
