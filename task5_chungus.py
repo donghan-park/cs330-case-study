@@ -2,7 +2,7 @@ import numpy as np
 import csv
 from task2 import ts_greedy
 from task3 import dtw
-from task4 import approach_2
+from task4 import approach_2_slow
 # from task4 import plot_original_trajectories
 import random
 import matplotlib.pyplot as plt
@@ -67,7 +67,7 @@ def chungus_lloyds(T, k, tmax):
         # recalculate centers & update trajectories for next iteration
         for partition in partitions:
             if len(partition['new_trajectories']):
-                partition['center'] = approach_2(partition['new_trajectories'])
+                partition['center'] = approach_2_slow(partition['new_trajectories'])
             partition['trajectories'] = partition['new_trajectories']
             partition['new_trajectories'] = []
 
@@ -100,21 +100,14 @@ def plot_trajectories(T, color_value):
 
 if __name__ == "__main__":
     k_list = [4, 6, 8, 10, 12]
-
-    # Read in a list of trajectory IDs from a text file
-    with open('trajectory-ids.txt', 'r') as file:
-        trajectory_ids = [line.rstrip() for line in file]
     # Create a dictionary to hold the trajectories for each ID
     trajectories = {}
-    for trajectory_id in trajectory_ids:
-        trajectories[trajectory_id] = []
     # Read in the trajectory data from a CSV file and add each point to the appropriate trajectory
     with open('geolife-cars-upd8.csv', newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',', quotechar='|')
         for row in reader:
             id = row[0]
-            if id in trajectories:
-                trajectories[id].append((float(row[1]), (float(row[2]))))
+            trajectories[id].append((float(row[1]), (float(row[2]))))
 
     # Convert the dictionary of trajectories to a list of trajectory lists
     T = []
@@ -124,8 +117,12 @@ if __name__ == "__main__":
     for i, trajectory in enumerate(T):
         T[i] = ts_greedy(T[i], 0.1)
 
-    k = 4
-    colors = ['red', 'green', 'blue', 'yellow']
+    k = 4 # change to list TODO <<<<
+    colors = [
+        'red', 'green', 'blue', 'yellow', 
+        'orange', 'purple', 'pink', 'brown',
+        'grey', 'lightcoral', 'chocolate', 'turquoise'
+    ]
     tmax = 15
     plot_trajectories(T, 'black')
 
