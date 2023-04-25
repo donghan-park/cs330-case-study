@@ -76,6 +76,7 @@ def seed_centers(T, k):
 
 
 def reassign_trajectory_partition(T, partitions):
+    cost = 0
     for t in T:
         min_dist = float('inf')
         # find closest partition center to t
@@ -85,6 +86,9 @@ def reassign_trajectory_partition(T, partitions):
                 min_dist = dist
                 closest_partition_idx = i
         partitions[closest_partition_idx]['new_trajectories'].append(t)
+        cost += min_dist
+    
+    return cost
 
 
 def lloyds(T, k, tmax, seeding_mode):
@@ -98,8 +102,9 @@ def lloyds(T, k, tmax, seeding_mode):
             'new_trajectories': []
         })
     reassign_trajectory_partition(T, partitions)
-        
-    for _ in range(tmax):
+    
+    cost = [0 for _ in range(tmax)]
+    for i in range(tmax):
         # recalculate centers & update trajectories for next iteration
         for partition in partitions:
             if len(partition['new_trajectories']):
@@ -107,16 +112,17 @@ def lloyds(T, k, tmax, seeding_mode):
             partition['trajectories'] = partition['new_trajectories']
             partition['new_trajectories'] = []
 
-        reassign_trajectory_partition(T, partitions)
+        cost[i] = reassign_trajectory_partition(T, partitions)
 
         trajectories_changed = True
         for partition in partitions:
             if partition['trajectories'] == partition['new_trajectories']:
                 trajectories_changed = False
         if not trajectories_changed:
+            print("broke after {} iterations".format(i + 1))
             break
     
-    return partitions
+    return partitions, cost
 
 def calc_cost(partitions):       
     cost = 0
@@ -144,6 +150,7 @@ def plot_trajectories(T, color_value):
 if __name__ == "__main__":
     # Create a dictionary to hold the trajectories for each ID
     trajectories = {}
+
     # Read in the trajectory data from a CSV file and add each point to the appropriate trajectory
     with open('geolife-cars-upd8.csv', newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -159,56 +166,88 @@ if __name__ == "__main__":
     T = []
     for trajectory in trajectories:
         T.append(trajectories[trajectory])
-        
+
     # Simplify the trajectory using ts_greedy
     for i, trajectory in enumerate(T):
         T[i] = ts_greedy(T[i], 0.1)
-    
+
+    # initialize variables
     k_list = [4, 6, 8, 10, 12]
     tmax = 15
-
     colors = [
-        'red', 'green', 'blue', 'yellow', 
-        'orange', 'purple', 'pink', 'brown',
-        'grey', 'lightcoral', 'chocolate', 'turquoise'
+        'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'brown', 'grey', 'black', 'turquoise', 'magenta'
     ]
 
-    optimal_k = 4
-    partitions = lloyds(T, optimal_k, tmax, 1)
-    centers = []
-    for i, partition in enumerate(partitions):
-        x_trajectory = [point[0] for point in partition['center']]
-        y_trajectory = [point[1] for point in partition['center']]
-        # Set the title, x-axis label, and y-axis label for the plot
-        plt.title('Trajectories')
-        plt.xlabel('X (km)')
-        plt.ylabel('Y (km)')
-        # Plot the trajectory using a black line with small dot markers
-        plt.plot(x_trajectory, y_trajectory, color=colors[i], label='Original Trajectory', marker='.', markersize=2)
-
-
-    # plot_trajectories(T, 'black')
-
-    # partitions = lloyds(T, k, tmax, 1)
-    # centers = []
-    # cluster_trajectories = []
-    # for i, partition in enumerate(partitions):
-    #     centers.append(partition['center'])
-    #     plot_trajectories(partition['new_trajectories'], colors[i])
-    #     print('partition #{}: {}'.format(i, len(partition['new_trajectories'])))
-
+    # TASK 5.3:
     random_costs = []
     kcenters_costs = []
     for k in k_list:
         r = 3
         random_clusters = [lloyds(T, k, tmax, 0) for _ in range(r)]
-        rc = np.sum([calc_cost(random_cluster) for random_cluster in random_clusters])/r
-        k_center_clusters = lloyds(T, k, tmax, 1)
-        kc = calc_cost(k_center_clusters)
+        rc = np.sum([calc_cost(random_cluster[0]) for random_cluster in random_clusters])/r
+        k_center_clusters = [lloyds(T, k, tmax, 1) for _ in range(r)]
+        kc = np.sum([calc_cost(k_center_cluster[0]) for k_center_cluster in k_center_clusters])/r
         random_costs.append(rc)
         kcenters_costs.append(kc)
 
     plt.figure(1)
-    plt.plot(k_list, random_costs, color="red")
-    plt.plot(k_list, kcenters_costs, color="blue")
+    plt.plot(k_list, random_costs, color="red", label='Random Seeding')
+    plt.plot(k_list, kcenters_costs, color="blue", label='Proposed Seeding')
+    plt.title("Average Cost of Clustering vs. k-value in Lloyd's algorithm")
+    plt.xlabel('k')
+    plt.ylabel('Average Cost')
+    plt.legend()
+
+    # TASK 5.4:
+    # optimal_k = 8
+    # r = 3
+    # random_clusters = [lloyds(T, optimal_k, tmax, 0) for _ in range(r)]
+    # k_center_clusters = [lloyds(T, optimal_k, tmax, 1) for _ in range(r)]
+    # random_cluster_costs = [cluster[1] for cluster in random_clusters]
+    # k_center_cluster_costs = [cluster[1] for cluster in k_center_clusters]
+    
+    # max_len = max(len(l) for l in random_cluster_costs)
+    # random_average = []
+    # for i in range(max_len):
+    #     total = sum(l[i] for l in random_cluster_costs if i < len(l))
+    #     avg = total / len([l for l in random_cluster_costs if i < len(l)])
+    #     random_average.append(avg)
+    
+    # max_len = max(len(l) for l in k_center_cluster_costs)
+    # k_center_average = []
+    # for i in range(max_len):
+    #     total = sum(l[i] for l in k_center_cluster_costs if i < len(l))
+    #     avg = total / len([l for l in k_center_cluster_costs if i < len(l)])
+    #     k_center_average.append(avg)
+    
+    # while random_average and random_average[-1] == 0:
+    #     random_average.pop()
+
+    # while k_center_average and k_center_average[-1] == 0:
+    #     k_center_average.pop()
+    
+    # plt.figure(2)
+    # plt.scatter([i for i in range(1, len(random_average) + 1)], random_average, color='red', label='Random Seeding')
+    # plt.scatter([i for i in range(1, len(k_center_average) + 1)], k_center_average, color='blue', label = 'Proposed Seeding')
+    # plt.title("Average Cost of Clustering vs. Iterations for k = 8")
+    # plt.xlabel('Iteration')
+    # plt.ylabel('Average Cost')
+    # plt.legend()
+    
+
+    # TASK 5.5:
+    # optimal_k = 8
+    # partitions = lloyds(T, optimal_k, tmax, 0)[0]
+    # centers = []
+    # plt.figure(3)
+    # # Set the title, x-axis label, and y-axis label for the plot
+    # plt.title('Center Trajectories of Clusters for k = 8')
+    # plt.xlabel('X (km)')
+    # plt.ylabel('Y (km)')
+    # for i, partition in enumerate(partitions):
+    #     x_trajectory = [point[0] for point in partition['center']]
+    #     y_trajectory = [point[1] for point in partition['center']]
+    #     plt.plot(x_trajectory, y_trajectory, color=colors[i], label='Center Trajectory {}'.format(i + 1), marker='.', markersize=2)
+    # plt.legend()
+
     plt.show()
