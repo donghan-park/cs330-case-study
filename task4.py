@@ -55,9 +55,9 @@ def plot_original_trajectories(t):
         x_trajectory = [point[0] for point in trajectory]
         y_trajectory = [point[1] for point in trajectory]
         plt.title('Trajectories')
-        plt.xlabel('X in km')
-        plt.ylabel('Y in km')
-        plt.plot(x_trajectory, y_trajectory, color='black', marker='.', markersize=8)
+        plt.xlabel('X (km)')
+        plt.ylabel('Y (km)')
+        plt.plot(x_trajectory, y_trajectory, color='black', marker='.', markersize=2)
         
 
 def main():
@@ -82,14 +82,14 @@ def main():
     approach_2_center = approach_2(t)
     x_trajectory = [point[0] for point in approach_2_center]
     y_trajectory = [point[1] for point in approach_2_center]
-    plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
+    plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=2)
 
     plt.figure(2)
     plot_original_trajectories(t)
     approach_1_center = approach_1(t)
     x_trajectory = [point[0] for point in approach_1_center]
     y_trajectory = [point[1] for point in approach_1_center]
-    plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
+    plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=2)
 
     for idx, error in enumerate([0.03, 0.1, 0.3]):
         for i, trajectory in enumerate(trajectories):
@@ -99,7 +99,7 @@ def main():
         approach_1_center = approach_1(t)
         x_trajectory = [point[0] for point in approach_1_center]
         y_trajectory = [point[1] for point in approach_1_center]
-        plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=8)
+        plt.plot(x_trajectory, y_trajectory, color='red', linestyle='dashed', marker='.', markersize=2)
     
     plt.show()
 
