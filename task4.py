@@ -176,8 +176,8 @@ def main():
         plot_original_trajectories(t)
         approach_1_center = approach_1(t)
         distance_sum = 0
-        for trajectory in t:
-            distance_sum += dtw(approach_1_center, trajectory)[0]
+        for trajectory in trajectories:
+            distance_sum += dtw(approach_1_center, trajectories[trajectory])[0]
         print("Average distance for approach 1 with error {}: {}".format(error, distance_sum / len(t)))
         x_trajectory = [point[0] for point in approach_1_center]
         y_trajectory = [point[1] for point in approach_1_center]
