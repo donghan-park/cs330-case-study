@@ -1,4 +1,3 @@
-import numpy as np
 import csv
 from task2 import ts_greedy
 from task3 import dtw
@@ -32,7 +31,62 @@ import matplotlib.pyplot as plt
 ⠀⢀⠤⠀⠀⢤⣤⣽⣿⣿⣦⣀⢀⡠⢤⡤⠄⠀⠒⠀⠁⠀⠀⠀⢘⠔⠀⠀⠀⠀
 ⠀⠀⠀⡐⠈⠁⠈⠛⣛⠿⠟⠑⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠉⠑⠒⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-BIG CHUNGUS
+BIG CHUNGUS :)
+
+
+                                       /;    ;\
+                                   __  \\____//
+                                  /{_\_/   `'\____
+                                  \___   (o)  (o  }
+       _____________________________/          :--'  
+   ,-,'`@@@@@@@@       @@@@@@         \_    `__\
+  ;:(  @@@@@@@@@        @@@             \___(o'o)
+  :: )  @@@@          @@@@@@        ,'@@(  `===='       
+  :: : @@@@@:          @@@@         `@@@:
+  :: \  @@@@@:       @@@@@@@)    (  '@@@'
+  ;; /\      /`,    @@@@@@@@@\   :@@@@@)
+  ::/  )    {_----------------:  :~`,~~;
+ ;;'`; :   )                  :  / `; ;
+;;;; : :   ;                  :  ;  ; :              
+`'`' / :  :                   :  :  : :
+    )_ \__;      ";"          :_ ;  \_\       `,','
+    :__\  \    * `,'*         \  \  :  \   *  8`;'*  *
+        `^'     \ :/           `^'  `-^-'   \v/ :  \/ 
+
+larry the cow :D
+
+                             .-----.
+                            /7  .  (
+                           /   .-.  \
+                          /   /   \  \
+                         / `  )   (   )
+                        / `   )   ).  \
+                      .'  _.   \_/  . |
+     .--.           .' _.' )`.        |
+    (    `---...._.'   `---.'_)    ..  \
+     \            `----....___    `. \  |
+      `.           _ ----- _   `._  )/  |
+        `.       /"  \   /"  \`.  `._   |
+          `.    ((O)` ) ((O)` ) `.   `._\
+            `-- '`---'   `---' )  `.    `-.
+               /                  ` \      `-.
+             .'                      `.       `.
+            /                     `  ` `.       `-.
+     .--.   \ ===._____.======. `    `   `. .___.--`     .''''.
+    ' .` `-. `.                )`. `   ` ` \          .' . '  8)
+   (8  .  ` `-.`.               ( .  ` `  .`\      .'  '    ' /
+    \  `. `    `-.               ) ` .   ` ` \  .'   ' .  '  /
+     \ ` `.  ` . \`.    .--.     |  ` ) `   .``/   '  // .  /
+      `.  ``. .   \ \   .-- `.  (  ` /_   ` . / ' .  '/   .'
+        `. ` \  `  \ \  '-.   `-'  .'  `-.  `   .  .'/  .'
+          \ `.`.  ` \ \    ) /`._.`       `.  ` .  .'  /
+    LGB    |  `.`. . \ \  (.'               `.   .'  .'
+        __/  .. \ \ ` ) \                     \.' .. \__
+ .-._.-'     '"  ) .-'   `.                   (  '"     `-._.--.
+(_________.-====' / .' /\_)`--..__________..-- `====-. _________)
+                 (.'(.'
+
+kathyl the wizard toad
 """
 
 
@@ -99,7 +153,15 @@ Runtime: O(tknm^2)
 - Depending on the seeding method used:
     - Random seeding iterates through all trajectories, in O(n)
     - K-centers iterates through all trajectories k times, in O(nk)
-- 
+- Initializing k partitions takes O(km)
+- Iterating through all trajectories to find its nearest partition takes O(nkm)
+- This is done for each iteration; hence, each iteration takes O(nkm) with a max of O(tknm)
+
+Hence, total runtime is bounded by O(tknm^2) where:
+t: number of iterations to termination
+k: number of desired clusters
+n: number of trajectories
+m: maximum size of trajectory
 """
 def lloyds(T, k, tmax, seeding_mode):
     centers = seed_centers(T, k) if seeding_mode else randomized_seed_centers(T, k)
@@ -149,7 +211,7 @@ def calc_cost(partitions):
     for partition in partitions: 
         if partition['new_trajectories']:   
             center = partition['center']
-            cost += np.sum([dtw(t, center)[0] for t in partition['new_trajectories']])
+            cost += sum([dtw(t, center)[0] for t in partition['new_trajectories']])
     return cost
 
 
@@ -206,9 +268,9 @@ if __name__ == "__main__":
     for k in k_list:
         r = 3
         random_clusters = [lloyds(T, k, tmax, 0) for _ in range(r)]
-        rc = np.sum([calc_cost(random_cluster[0]) for random_cluster in random_clusters])/r
+        rc = sum([calc_cost(random_cluster[0]) for random_cluster in random_clusters])/r
         k_center_clusters = [lloyds(T, k, tmax, 1) for _ in range(r)]
-        kc = np.sum([calc_cost(k_center_cluster[0]) for k_center_cluster in k_center_clusters])/r
+        kc = sum([calc_cost(k_center_cluster[0]) for k_center_cluster in k_center_clusters])/r
         print("Average cost with random seeding for k = {} is {}".format(k, rc))
         random_costs.append(rc)
         print("Average cost with k-centers seeding for k = {} is {}".format(k, kc))
