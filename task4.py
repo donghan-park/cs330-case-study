@@ -1,6 +1,5 @@
 import csv
 import matplotlib.pyplot as plt
-import numpy as np
 from task2 import ts_greedy
 from task3 import dtw
 
@@ -33,27 +32,57 @@ def approach_1(trajectories):
 
 def approach_2(trajectories):
     max_len = max(len(traj) for traj in trajectories)
-    # Initialize an array to store the interpolated trajectories
-    interpolated_trajectories = np.zeros((len(trajectories), max_len, 2))
+    # Initialize a list to store the interpolated trajectories
+    interpolated_trajectories = [[[0, 0] for _ in range(max_len)] for _ in range(len(trajectories))]
+
+    # Compute the cumulative distances for each trajectory
+    cumulative_distances_list = []
+    for traj in trajectories:
+        distances = []
+        for j in range(1, len(traj)):
+            dx = traj[j][0] - traj[j-1][0]
+            dy = traj[j][1] - traj[j-1][1]
+            distances.append((dx ** 2 + dy ** 2) ** 0.5)
+
+        cumulative_distances = [0] + [sum(distances[:k+1]) for k in range(len(distances))]
+        cumulative_distances_list.append(cumulative_distances)
 
     # Compute the interpolated trajectories
     for i, traj in enumerate(trajectories):
-        # Convert trajectory to numpy array
-        traj = np.array(traj)
-
-        # Compute the distance travelled at each point in the trajectory
-        distances = np.sqrt(np.sum(np.diff(traj, axis=0) ** 2, axis=1))
-        cumulative_distances = np.concatenate(([0], np.cumsum(distances)))
-
+        cumulative_distances = cumulative_distances_list[i]
         # Compute the target distances for interpolation
-        target_distances = np.linspace(0, cumulative_distances[-1], max_len)
+        target_distances = [t * cumulative_distances[-1] / (max_len - 1) for t in range(max_len)]
 
         # Interpolate the trajectory using target distances
+        interpolated_points = [[0, 0] for _ in range(max_len)]
         for dim in range(2):
-            interpolated_trajectories[i, :, dim] = np.interp(target_distances, cumulative_distances, traj[:, dim])
+            interpolated_dim = []
+            k = 0
+            for j in range(max_len):
+                while k < len(cumulative_distances) - 2 and target_distances[j] > cumulative_distances[k + 1]:
+                    k += 1
+                if cumulative_distances[k+1] == cumulative_distances[k]:
+                    t = 0
+                else:
+                    t = (target_distances[j] - cumulative_distances[k]) / (cumulative_distances[k + 1] - cumulative_distances[k])
+                interpolated_point_dim = (1 - t) * traj[k][dim] + t * traj[k+1][dim]
+                interpolated_dim.append(interpolated_point_dim)
+            for j in range(max_len):
+                interpolated_points[j][dim] = interpolated_dim[j]
+
+        # Store interpolated trajectory in list
+        for j in range(max_len):
+            interpolated_trajectories[i][j][0] = interpolated_points[j][0]
+            interpolated_trajectories[i][j][1] = interpolated_points[j][1]
 
     # Compute the mean trajectory
-    mean_trajectory = np.mean(interpolated_trajectories, axis=0)
+    mean_trajectory = [[0, 0] for _ in range(max_len)]
+    for j in range(max_len):
+        for i in range(len(trajectories)):
+            mean_trajectory[j][0] += interpolated_trajectories[i][j][0]
+            mean_trajectory[j][1] += interpolated_trajectories[i][j][1]
+        mean_trajectory[j][0] /= len(trajectories)
+        mean_trajectory[j][1] /= len(trajectories)
 
     # Return the mean trajectory
     return mean_trajectory
