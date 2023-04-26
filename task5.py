@@ -6,6 +6,9 @@ import random
 import matplotlib.pyplot as plt
 
 """
+Before we begin with the code, let us improve our well-being 
+by appreciating the following animal friends :)
+
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣧⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣧⠀⠀⠀⢰⡿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⡟⡆⠀⠀⣿⡇⢻⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -31,8 +34,7 @@ import matplotlib.pyplot as plt
 ⠀⢀⠤⠀⠀⢤⣤⣽⣿⣿⣦⣀⢀⡠⢤⡤⠄⠀⠒⠀⠁⠀⠀⠀⢘⠔⠀⠀⠀⠀
 ⠀⠀⠀⡐⠈⠁⠈⠛⣛⠿⠟⠑⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠉⠑⠒⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-BIG CHUNGUS :)
-
+BIG CHUNGUS
 
                                        /;    ;\
                                    __  \\____//
@@ -53,7 +55,7 @@ BIG CHUNGUS :)
     :__\  \    * `,'*         \  \  :  \   *  8`;'*  *
         `^'     \ :/           `^'  `-^-'   \v/ :  \/ 
 
-larry the cow :D
+Larry the Cow
 
                              .-----.
                             /7  .  (
@@ -86,7 +88,7 @@ larry the cow :D
 (_________.-====' / .' /\_)`--..__________..-- `====-. _________)
                  (.'(.'
 
-kathyl the wizard toad
+kathyl the Wizard Toad
 """
 
 
