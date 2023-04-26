@@ -3,24 +3,9 @@ import csv
 from task2 import ts_greedy
 from task3 import dtw
 from task4 import approach_2
-# from task4 import plot_original_trajectories
 import random
 import matplotlib.pyplot as plt
 
-"""
-    high-level:
-    * trajectories must be simplified using method from task 2 to lower runtime
-    
-    1.  seed centers:
-        use k-centers alg by picking random initial trajectory
-        update trajectories to closest center
-        mark trajectory with farthest distance as next center
-        repeat
-    2.  partition trajectories into their closest respective centers
-    3.  compute new centers for each partition
-    4.  for each trajectory, use new centers to group them into new partitions
-    5.  repeat until centers do not change after one iteration
-"""
 """
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣧⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣧⠀⠀⠀⢰⡿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -50,6 +35,10 @@ import matplotlib.pyplot as plt
 BIG CHUNGUS
 """
 
+
+"""
+Initialize centers using randomized seeding
+"""
 def randomized_seed_centers(T, k):
     centers = []
     t_indices = random.sample(range(len(T)), k)
@@ -58,6 +47,10 @@ def randomized_seed_centers(T, k):
         
     return centers
 
+
+"""
+Initialize centers using k-centers algorithm
+"""
 def seed_centers(T, k):
     # choose random initial center
     centers = [random.choice(T)]
@@ -75,6 +68,9 @@ def seed_centers(T, k):
     return centers
 
 
+"""
+Reassign each trajectory t in T to its nearest partition
+"""
 def reassign_trajectory_partition(T, partitions):
     cost = 0
     for t in T:
@@ -88,14 +84,30 @@ def reassign_trajectory_partition(T, partitions):
         partitions[closest_partition_idx]['new_trajectories'].append(t)
         cost += min_dist
     
+    # return cost for computing cost
     return cost
 
 
+"""
+Runs Lloyd's algorithm to compute k clusters. The seeding mode can be 
+specified by changing the fourth parameter, seeding_mode:
+
+0: run with random seeding
+1: run with proposed seeding (k-centers algorithm)
+
+Runtime: O(tknm^2)
+- Depending on the seeding method used:
+    - Random seeding iterates through all trajectories, in O(n)
+    - K-centers iterates through all trajectories k times, in O(nk)
+- 
+"""
 def lloyds(T, k, tmax, seeding_mode):
     centers = seed_centers(T, k) if seeding_mode else randomized_seed_centers(T, k)
     
+    # create list to store lists of partitions
     partitions = []
     for c in centers:
+        # each partition is represented as a dictionary with the following keys
         partitions.append({
             'center': c,
             'trajectories': [],
@@ -103,7 +115,10 @@ def lloyds(T, k, tmax, seeding_mode):
         })
     reassign_trajectory_partition(T, partitions)
     
+    # initialize list for storing iteration costs
     cost = [0 for _ in range(tmax)]
+
+    # run iterations until no change in trajectory data is found or tmax is reached
     for i in range(tmax):
         # recalculate centers & update trajectories for next iteration
         for partition in partitions:
@@ -112,8 +127,10 @@ def lloyds(T, k, tmax, seeding_mode):
             partition['trajectories'] = partition['new_trajectories']
             partition['new_trajectories'] = []
 
+        # reassign all trajectories to nearest partitions
         cost[i] = reassign_trajectory_partition(T, partitions)
 
+        # break loop if no change is found
         trajectories_changed = True
         for partition in partitions:
             if partition['trajectories'] == partition['new_trajectories']:
@@ -123,6 +140,10 @@ def lloyds(T, k, tmax, seeding_mode):
     
     return partitions, cost
 
+
+"""
+Calculate average cost from partitions created using Lloyd's
+"""
 def calc_cost(partitions):       
     cost = 0
     for partition in partitions: 
@@ -131,9 +152,11 @@ def calc_cost(partitions):
             cost += np.sum([dtw(t, center)[0] for t in partition['new_trajectories']])
     return cost
 
+
+"""
+Helper function to plot list of trajectories
+"""
 def plot_trajectories(T, color_value):
-    # This function takes a list of trajectories as input and plots them
-    # Each trajectory is represented as a list of points
     for trajectory in T:
         # Extract the X and Y coordinates for each point in the trajectory
         x_trajectory = [point[0] for point in trajectory]
@@ -177,7 +200,7 @@ if __name__ == "__main__":
         'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'brown', 'grey', 'black', 'turquoise', 'magenta'
     ]
 
-    # TASK 5.3:
+    # TASK 4.2.3:
     random_costs = []
     kcenters_costs = []
     for k in k_list:
@@ -199,7 +222,7 @@ if __name__ == "__main__":
     plt.ylabel('Average Cost')
     plt.legend()
 
-    # TASK 5.4:
+    # TASK 4.2.4:
     optimal_k = 8
     r = 3
     random_clusters = [lloyds(T, optimal_k, tmax, 0) for _ in range(r)]
@@ -236,7 +259,7 @@ if __name__ == "__main__":
     plt.legend()
     
 
-    # TASK 5.5:
+    # TASK 4.2.5:
     optimal_k = 8
     partitions = lloyds(T, optimal_k, tmax, 1)[0]
     centers = []
